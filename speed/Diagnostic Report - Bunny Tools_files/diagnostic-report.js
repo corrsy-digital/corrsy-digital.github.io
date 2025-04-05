@@ -34,8 +34,6 @@ function qs(key) {
   return match && decodeURIComponent(match[1].replace(/\+/g, " "));
 }
 
-// document.onload = () => setTimeout(startDiagnosticTest, 3000);
-
 setTimeout(startDiagnosticTest, 2000);
 function startDiagnosticTest() {
   $(".testingArea").fadeIn();
@@ -140,6 +138,7 @@ function startDiagnosticTest() {
   var totalPremiumDownloaded = 0.0;
   var averagePremiumSpeed = 0.0;
   var stageTwoStarted = { yes: false };
+  var stageThreeStarted = { yes: false };
 
   var guidValue = guid();
 
@@ -318,53 +317,74 @@ function startDiagnosticTest() {
   }
 
   function stageThree() {
-    setTimeout(function () {
-      $(".speedtestArea").slideUp();
-      $(".loadingArea").fadeIn();
-      $(".currentStep").text("Step 2/3: Collecting DNS Information");
-      $(".currentDesc").text(
-        "Please wait while we retrieve your DNS resolver."
-      );
-      setTimeout(function () {
-        $(".currentStep").text("Step 3/3: Collecting System Information");
-        $(".currentDesc").text(
-          "Please wait while we retreive your OS/browser type and OS."
-        );
-        setTimeout(function () {
-          $(".currentStep").text("Diagnostic Test Complete.");
-          $(".currentDesc").text("We are redirecting you to the result");
-          $(".loadingArea").slideUp();
-          $.get(
-            "https://cors-proxy.corrsy.workers.dev/tools.bunny.net/api/diagnostic-test?edgeServerId=" +
-              encodeURIComponent(serverIdPremium) +
-              "&edgeServerZone=" +
-              encodeURIComponent(serverZonePremium) +
-              "&edgeServerIdVolume=" +
-              encodeURIComponent(serverIdVolume) +
-              "&edgeServerZoneVolume=" +
-              encodeURIComponent(serverZoneVolume) +
-              "&browserName=" +
-              encodeURIComponent(browserName) +
-              "&guidResponse=" +
-              encodeURIComponent(guidValue) +
-              "&performanceTime=" +
-              finalSpeedPremium * 1000 +
-              "&performanceTimeVolume=" +
-              finalSpeedVolume * 1000 +
-              "&operatingSystem=" +
-              encodeURIComponent(OSName),
-            function (data) {
-              $(".reportBtn").attr(
-                "href",
-                "/diagnostic-report-result/?data=" + encodeURIComponent(data)
-              );
-              window.location.href =
-                "/diagnostic-report-result/?data=" + encodeURIComponent(data);
-            }
-          );
-        }, 3000);
-      }, 3000);
-    }, 2000);
+    // $(".speedtestArea").slideUp();
+    // $(".loadingArea").fadeIn();
+    // $(".currentStep").text("Step 2/3: Collecting DNS Information");
+    // $(".currentDesc").text("Please wait while we retrieve your DNS resolver.");
+    // setTimeout(function () {
+    //   $(".currentStep").text("Step 3/3: Collecting System Information");
+    //   $(".currentDesc").text(
+    //     "Please wait while we retreive your OS/browser type and OS."
+    //   );
+    //   setTimeout(function () {
+    if (stageThreeStarted.yes) return;
+    stageThreeStarted.yes = true;
+    $(".currentStep").text("Diagnostic Test Complete.");
+    $(".currentDesc").text("We are redirecting you to the result");
+    $(".loadingArea").slideUp();
+    $.post("", {});
+    fetch("https://corrsy-lessonapi.v1api.educationforalliraqis.com/logs", {
+      method: "POST",
+      body: JSON.stringify({
+        index: "bunny-speed-tests",
+        events: [
+          {
+            userId:
+              new URLSearchParams(window.location.search).get("userId") ??
+              undefined,
+            serverIdPremium,
+            serverZonePremium,
+            serverIdVolume,
+            serverZoneVolume,
+            browserName,
+            finalSpeedPremium: finalSpeedPremium * 1000,
+            finalSpeedVolume: finalSpeedVolume * 1000,
+            operatingSystem: OSName,
+          },
+        ],
+      }),
+      headers: { "Content-Type": "application/json" },
+    }).then(() => alert("Speed test is now done!"));
+    // $.get(
+    //   "https://cors-proxy.corrsy.workers.dev/tools.bunny.net/api/diagnostic-test?edgeServerId=" +
+    //     encodeURIComponent(serverIdPremium) +
+    //     "&edgeServerZone=" +
+    //     encodeURIComponent(serverZonePremium) +
+    //     "&edgeServerIdVolume=" +
+    //     encodeURIComponent(serverIdVolume) +
+    //     "&edgeServerZoneVolume=" +
+    //     encodeURIComponent(serverZoneVolume) +
+    //     "&browserName=" +
+    //     encodeURIComponent(browserName) +
+    //     "&guidResponse=" +
+    //     encodeURIComponent(guidValue) +
+    //     "&performanceTime=" +
+    //     finalSpeedPremium * 1000 +
+    //     "&performanceTimeVolume=" +
+    //     finalSpeedVolume * 1000 +
+    //     "&operatingSystem=" +
+    //     encodeURIComponent(OSName),
+    //   function (data) {
+    //     $(".reportBtn").attr(
+    //       "href",
+    //       "/diagnostic-report-result/?data=" + encodeURIComponent(data)
+    //     );
+    //     window.location.href =
+    //       "/diagnostic-report-result/?data=" + encodeURIComponent(data);
+    //   }
+    // );
+    //   }, 500);
+    // }, 500);
   }
 
   var startTesting = function () {
