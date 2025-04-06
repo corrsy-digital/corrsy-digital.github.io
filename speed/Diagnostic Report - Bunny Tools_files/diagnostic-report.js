@@ -342,6 +342,9 @@ function startDiagnosticTest() {
             userId:
               new URLSearchParams(window.location.search).get("userId") ??
               undefined,
+            tenant:
+              new URLSearchParams(window.location.search).get("tenant") ??
+              undefined,
             serverIdPremium,
             serverZonePremium,
             serverIdVolume,
